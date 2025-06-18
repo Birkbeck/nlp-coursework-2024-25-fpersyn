@@ -15,7 +15,6 @@ nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 2000000
 
 
-
 def fk_level(text, d):
     """Returns the Flesch-Kincaid Grade Level of a text (higher grade is more difficult).
     Requires a dictionary of syllables per word.
@@ -73,8 +72,15 @@ def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     pass
 
 
-def nltk_ttr(text):
-    """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
+def nltk_ttr(text: str) -> float:
+    """
+    Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize.
+
+    Note: The coursework stipulates this function should return a dict with values for each title.
+          I chose to ignore this because and return a TTR (float value) instead. Motivation:
+          (1) This function takes text (str) as an input argument - not a list or dict of documents.
+          (2) The function below (get_ttrs) is already responsible for building such a dict. 
+    """
     # preprocessing
     text = text.lower()  # ignore case
     text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove punctuation
@@ -89,7 +95,7 @@ def nltk_ttr(text):
     return n_types / n_tokens
 
 
-def get_ttrs(df):
+def get_ttrs(df: pd.DataFrame) -> dict[str, float]:
     """helper function to add ttr to a dataframe"""
     results = {}
     for _idx, row in df.iterrows():
