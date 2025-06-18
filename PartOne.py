@@ -3,6 +3,8 @@
 # Note: The template functions here and the dataframe format for structuring your solution is a suggested but not mandatory approach. You can use a different approach if you like, as long as you clearly answer the questions and communicate your answers clearly.
 
 from pathlib import Path
+import string
+import re
 
 import pandas as pd
 import spacy
@@ -74,11 +76,16 @@ def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
 def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
     # preprocessing
-    # TODO: remove punctuation from tokens
-    # TODO: ignore case
+    text = text.lower()  # ignore case
+    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove punctuation
+
+    # tokenisation
     tokens = nltk.word_tokenize(text)
-    n_tokens: int = len(tokens)  # token count
+
+    # counts
+    n_tokens: int = len(tokens)
     n_types: int = len(set(tokens))  # unique tokens
+
     return n_types / n_tokens
 
 
