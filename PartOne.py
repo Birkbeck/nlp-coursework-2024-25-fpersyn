@@ -29,7 +29,8 @@ def fk_level(text: str) -> float:
 
     # preprocessing
     text = text.lower()  # ignore case
-    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove punctuation symbols
+    text = re.sub(r"-{2,}", " ", text)  # replace repeat hyphens with spaces
+    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove all punctuation symbols
 
     # tokenisation
     tokens_sentences = nltk.sent_tokenize(text)
@@ -101,7 +102,7 @@ def nltk_ttr(text: str) -> float:
     """
     # preprocessing
     text = text.lower()  # ignore case
-    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove punctuation
+    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove all punctuation symbols
 
     # tokenisation
     tokens = nltk.word_tokenize(text)
