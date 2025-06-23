@@ -85,10 +85,23 @@ def read_novels(path: Path = Path.cwd() / "p1-texts") -> pd.DataFrame:
     )
 
 
-def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
+def parse(
+    df: pd.DataFrame,
+    store_path: Path = Path.cwd() / "pickles",
+    out_name: str = "parsed.pickle"
+) -> pd.DataFrame:
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
-    pass
+
+    # parse documents
+    df["parsed"] = df["text"].apply(nlp)  # apply the spacy pipeline (nlp) to each text item
+
+    # pickle dataframe
+    if not store_path.exists():
+        store_path.mkdir()
+    df.to_pickle(path=store_path / out_name)
+
+    return df
 
 
 def nltk_ttr(text: str) -> float:
@@ -164,11 +177,11 @@ if __name__ == "__main__":
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
-    # parse(df)
-    # print(df.head())
+    parse(df)
+    print(df.head())
     print(get_ttrs(df))
     print(get_fks(df))
-    # df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
+    df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
     # print(adjective_counts(df))
     """ 
     for i, row in df.iterrows():
@@ -181,4 +194,3 @@ if __name__ == "__main__":
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
         print("\n")
     """
-
