@@ -173,15 +173,25 @@ if __name__ == "__main__":
     nltk.download("punkt_tab")  # English tokenizer
     nltk.download("cmudict")  # English syllable dictionary
 
+    # question A
     path = Path.cwd() / "p1-texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
+
+    # question B
+    print(get_ttrs(df))
+
+    # question C
+    print(get_fks(df))
+
+    # question E
     parse(df)
     print(df.head())
-    print(get_ttrs(df))
-    print(get_fks(df))
+
+    # question F
     df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
+
     # print(adjective_counts(df))
     """ 
     for i, row in df.iterrows():
