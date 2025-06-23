@@ -28,13 +28,13 @@ def fk_level(text: str) -> float:
     cmudict = nltk.corpus.cmudict.dict()  # English syllable dictionary – embedded this in the function and changed its signature
 
     # preprocessing
-    text = text.lower()  # ignore case
-    text = re.sub(r"-{2,}", " ", text)  # replace repeat hyphens with spaces
-    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove all punctuation symbols
+    text_wrk = text.lower()  # ignore case
+    text_wrk = re.sub(r"-{2,}", " ", text_wrk)  # replace repeat hyphens with spaces
+    text_wrk = re.sub(r"[%s]" % string.punctuation, "", text_wrk)  # remove all punctuation symbols
 
     # tokenisation
-    tokens_sentences = nltk.sent_tokenize(text)
-    tokens_words = nltk.word_tokenize(text)
+    tokens_sentences = nltk.sent_tokenize(text)  # using the RAW text here because we need punctuation to tokenise sentences
+    tokens_words = nltk.word_tokenize(text_wrk)
     syllable_counts: list[int] = [count_syl(w, cmudict) for w in tokens_words]  # only counting to save memory
 
     # metrics
