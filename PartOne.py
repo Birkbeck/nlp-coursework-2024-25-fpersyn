@@ -15,32 +15,50 @@ nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 2000000
 
 
-def fk_level(text, d):
+def fk_level(text: str) -> float:
     """Returns the Flesch-Kincaid Grade Level of a text (higher grade is more difficult).
     Requires a dictionary of syllables per word.
 
     Args:
         text (str): The text to analyze.
-        d (dict): A dictionary of syllables per word.
 
     Returns:
-        float: The Flesch-Kincaid Grade Level of the text. (higher grade is more difficult)
+        float: The Flesch-Kincaid Grade Level of the text to the nearest 4 decimal points. (higher grade is more difficult)
     """
-    pass
+    cmudict = nltk.corpus.cmudict.dict()  # English syllable dictionary – embedded this in the function and changed its signature
+
+    # preprocessing
+    text = text.lower()  # ignore case
+    text = re.sub(r"[%s]" % string.punctuation, "", text)  # remove punctuation symbols
+
+    # tokenisation
+    tokens_sentences = nltk.sent_tokenize(text)
+    tokens_words = nltk.word_tokenize(text)
+    syllable_counts: list[int] = [count_syl(w, cmudict) for w in tokens_words]  # only counting to save memory
+
+    # metrics
+    avg_sentence_length = len(tokens_words) / len(tokens_sentences)
+    avg_syllables_per_word = sum(syllable_counts) / len(syllable_counts)
+    fk_level: float = (0.39 * avg_sentence_length) + (11.8 * avg_syllables_per_word) - 15.59  # Flesch-Kincaid grade level formula
+
+    return round(fk_level, 4)
 
 
-def count_syl(word, d):
+def count_syl(word: str, word_syllables: dict) -> int:
     """Counts the number of syllables in a word given a dictionary of syllables per word.
     if the word is not in the dictionary, syllables are estimated by counting vowel clusters
 
     Args:
         word (str): The word to count syllables for.
-        d (dict): A dictionary of syllables per word.
+        word_syllables (dict): A word-syllable dictionary. For example, nltk.corpus.reader.cmudict
 
     Returns:
         int: The number of syllables in the word.
     """
-    pass
+    results: list[list[str]] = word_syllables.get(word)  # can have multiple results (e.g. "tomato")
+    if results:
+        return len(results[0])  # only count syllables in first match
+    return 0  # fallback value if no match
 
 
 def read_novels(path: Path = Path.cwd() / "p1-texts") -> pd.DataFrame:
@@ -105,12 +123,13 @@ def get_ttrs(df: pd.DataFrame) -> dict[str, float]:
     return results
 
 
-def get_fks(df):
+def get_fks(df) -> dict[str, float]:
     """helper function to add fk scores to a dataframe"""
     results = {}
-    cmudict = nltk.corpus.cmudict.dict()
-    for i, row in df.iterrows():
-        results[row["title"]] = round(fk_level(row["text"], cmudict), 4)
+    for _idx, row in df.iterrows():
+        title = row["title"]
+        text = row["text"]
+        results[title] = fk_level(text)
     return results
 
 
@@ -136,15 +155,18 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
+    # dependencies
+    nltk.download("punkt_tab")  # English tokenizer
+    nltk.download("cmudict")  # English syllable dictionary
+
     path = Path.cwd() / "p1-texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
-    # nltk.download("cmudict")
     # parse(df)
     # print(df.head())
     print(get_ttrs(df))
-    # print(get_fks(df))
+    print(get_fks(df))
     # df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
     # print(adjective_counts(df))
     """ 
