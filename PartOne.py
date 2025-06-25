@@ -163,25 +163,49 @@ def get_fks(df) -> dict[str, float]:
     return results
 
 
-def subjects_by_verb_pmi(doc, target_verb):
-    """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    pass
-
-
-
-def top10_subjects_by_verb_count(doc: spacy.tokens.Doc, verb: str) -> list[tuple[str, int]]:
+def top10_subjects_by_verb_pmi(doc: spacy.tokens.Doc, verb: str):
     """
-    Extracts the most common subjects of a given verb in a parsed document. Returns a list of tuples.
+    Extracts the most common subjects of a given verb in a parsed document based on PMI.
 
     Args:
         doc: a spacy token document.
         verb: a base form verb (e.g. "to work" becomes "work")
 
+    Returns:
+        A list of tuples following the format: (word, pmi)
+
     Design:
         - Changed the name of this function for readability.
         - Selecting verb tokens by lemma (base form) ignores its tense.
         - By using spacy's dependency parsing we can extract the subject for each verb (NSUBJ).
-        - Extracting the subject lemma (base form) account for capitalisation and singular/plural.
+        - Extracting the subject lemma (base form) accounts for capitalisation and singular/plural.
+        - Assumed point-wise mutual information (PMI) of the subject with the verb.
+        - Using a dict to avoid duplicate entries.
+        - Transforming the dict to a list, ordering by PMI and returning the TOP10.
+    """
+    verb_tokens = [t for t in doc if t.lemma_ == verb]
+    subjects = {child.lemma_: child.similarity(t) for t in verb_tokens for child in t.children if child.dep == spacy.symbols.nsubj}
+    subject_pmi = [(k, v) for k, v in subjects.items() if v is not None]
+    subject_pmi.sort(key=lambda x: x[1], reverse=True)
+    return subject_pmi[:10]
+
+
+def top10_subjects_by_verb_count(doc: spacy.tokens.Doc, verb: str) -> list[tuple[str, int]]:
+    """
+    Extracts the most common subjects of a given verb in a parsed document based on frequency.
+
+    Args:
+        doc: a spacy token document.
+        verb: a base form verb (e.g. "to work" becomes "work")
+
+    Returns:
+        A list of tuples following the format: (word, frequency)
+
+    Design:
+        - Changed the name of this function for readability.
+        - Selecting verb tokens by lemma (base form) ignores its tense.
+        - By using spacy's dependency parsing we can extract the subject for each verb (NSUBJ).
+        - Extracting the subject lemma (base form) accounts for capitalisation and singular/plural.
     """
     verb_tokens = [t for t in doc if t.lemma_ == verb]
     subjects = [child.lemma_ for t in verb_tokens for child in t.children if child.dep == spacy.symbols.nsubj]
@@ -250,10 +274,10 @@ if __name__ == "__main__":
         print(top10_subjects_by_verb_count(row["parsed"], "hear"))
         print("\n")
 
-    # logging.info("Extracting TOP10 subjects for verb 'to hear' by point-wise mutual information for each document.")
-    # for _idx, row in df.iterrows():
-    #     print(row["title"])
-    #     print(subjects_by_verb_pmi(row["parsed"], "hear"))
-    #     print("\n")
+    logging.info("Extracting TOP10 subjects for verb 'to hear' by point-wise mutual information for each document.")
+    for _idx, row in df.iterrows():
+        print(row["title"])
+        print(top10_subjects_by_verb_pmi(row["parsed"], "hear"))
+        print("\n")
 
     logging.info("Ended script part 1.")
