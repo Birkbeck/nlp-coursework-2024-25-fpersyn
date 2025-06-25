@@ -100,8 +100,14 @@ def parse(
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
 
+    def parse_text(text: str):
+        """Parse a text using spacy's nlp pipeline."""
+        doc = nlp(text)
+        logging.debug("Extracted document using spacy.")
+        return doc
+
     # parse documents
-    df["parsed"] = df["text"].apply(nlp)  # apply the spacy pipeline (nlp) to each text item
+    df["parsed"] = df["text"].apply(parse_text)
     logging.debug("Added new column to DataFrame with parsed Doc objects for each file.")
 
     # pickle dataframe
