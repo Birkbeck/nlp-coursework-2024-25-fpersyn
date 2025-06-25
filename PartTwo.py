@@ -28,6 +28,9 @@ def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df["party"].isin(top4_most_common_parties)]
     print("TOP4 most common parties:", top4_most_common_parties)
 
+    # only keep speeches
+    df = df[df["speech_class"] == "Speech"]
+
     print("dataframe size after filtering:", df.shape)
     print(df.head())
     return df
