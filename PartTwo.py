@@ -31,6 +31,9 @@ def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
     # only keep speeches
     df = df[df["speech_class"] == "Speech"]
 
+    # only keep long speeches
+    df = df[df['speech'].str.len() >= 1000]
+
     print("dataframe size after filtering:", df.shape)
     print(df.head())
     return df
