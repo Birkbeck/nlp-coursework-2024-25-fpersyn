@@ -2,6 +2,7 @@
 
 # Note: The template functions here and the dataframe format for structuring your solution is a suggested but not mandatory approach. You can use a different approach if you like, as long as you clearly answer the questions and communicate your answers clearly.
 
+from collections import Counter
 from pathlib import Path
 import logging
 import string
@@ -173,57 +174,69 @@ def subjects_by_verb_count(doc, verb):
     pass
 
 
+def top10_objects(doc: spacy.tokens.Doc) -> list[tuple[str, int]]:
+    """
+    Extracts the most common syntactic objects in a parsed document. Returns a list of tuples.
 
-def adjective_counts(doc):
-    """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
-    pass
+    Args:
+        doc: A spacy Doc, representing a sequence of spacy Token objects.
+
+    Design:
+        - Changed the name of this function because the coursework sheet asks for the TOP10 syntactic objects overall - not adjectives.
+        - Using lemmas (base form of each word) to account for tenses, capitalisation and singular/plural.
+        - Ignoring spaces, new lines, punctuation, stop words, symbols and numbers.
+    """
+    words = [t.lemma_ for t in doc if not t.is_space and not t.is_punct and not t.is_stop and t.pos_ not in ["SYM", "NUM"]]
+    return Counter(words).most_common(10)
 
 
 if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    logging.info("Start part 1 script.")
+    # logging.info("Started script part 1.")
 
-    # dependencies
-    nltk.download("punkt_tab")  # English tokenizer
-    nltk.download("cmudict")  # English syllable dictionary
+    # # dependencies
+    # nltk.download("punkt_tab")  # English tokenizer
+    # nltk.download("cmudict")  # English syllable dictionary
 
-    # question A
-    logging.info("Running code for part 1 question A.")
-    path = Path.cwd() / "p1-texts" / "novels"
-    print(path)
-    df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    print(df.head())
+    # # question A
+    # logging.info("Running code for part 1 question A.")
+    # path = Path.cwd() / "p1-texts" / "novels"
+    # print(path)
+    # df = read_novels(path) # this line will fail until you have completed the read_novels function above.
+    # print(df.head())
 
-    # question B
-    logging.info("Running code for part 1 question B.")
-    print(get_ttrs(df))
+    # # question B
+    # logging.info("Running code for part 1 question B.")
+    # print(get_ttrs(df))
 
-    # question C
-    logging.info("Running code for part 1 question C.")
-    print(get_fks(df))
+    # # question C
+    # logging.info("Running code for part 1 question C.")
+    # print(get_fks(df))
 
-    # question E
-    logging.info("Running code for part 1 question E.")
-    parse(df)
-    print(df.head())
+    # # question E
+    # logging.info("Running code for part 1 question E.")
+    # parse(df)
+    # print(df.head())
 
     # question F
     logging.info("Running code for part 1 question F.")
     df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
-
-    # print(adjective_counts(df))
-    """ 
-    for i, row in df.iterrows():
+    for _idx, row in df.iterrows():
+        print(row["title"])
+        print(top10_objects(row["parsed"]))
+        print("\n")
+    """
+    for _idx, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_count(row["parsed"], "hear"))
         print("\n")
 
-    for i, row in df.iterrows():
+    for _idx, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
         print("\n")
     """
 
-    logging.info("End part 1 script.")
+    logging.info("Ended script part 1.")
