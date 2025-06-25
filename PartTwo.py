@@ -17,7 +17,16 @@ def get_dataset() -> pd.DataFrame:
 def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
     """Filter the dataset."""
 
-    df['party'] = df['party'].replace("Labour (Co-op)", "Labour")
+    # replace duplicate alt label
+    df["party"] = df["party"].replace("Labour (Co-op)", "Labour")
+
+    # remove speaker party value
+    df = df[df["party"] != "Speaker"]
+
+    # only keep top4 most common parties
+    top4_most_common_parties = df['party'].value_counts()[:4].index.to_list()
+    df = df[df["party"].isin(top4_most_common_parties)]
+    print("TOP4 most common parties:", top4_most_common_parties)
 
     print("dataframe size after filtering:", df.shape)
     print(df.head())
