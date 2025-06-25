@@ -169,9 +169,23 @@ def subjects_by_verb_pmi(doc, target_verb):
 
 
 
-def subjects_by_verb_count(doc, verb):
-    """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    pass
+def top10_subjects_by_verb_count(doc: spacy.tokens.Doc, verb: str) -> list[tuple[str, int]]:
+    """
+    Extracts the most common subjects of a given verb in a parsed document. Returns a list of tuples.
+
+    Args:
+        doc: a spacy token document.
+        verb: a base form verb (e.g. "to work" becomes "work")
+
+    Design:
+        - Changed the name of this function for readability.
+        - Selecting verb tokens by lemma (base form) ignores its tense.
+        - By using spacy's dependency parsing we can extract the subject for each verb (NSUBJ).
+        - Extracting the subject lemma (base form) account for capitalisation and singular/plural.
+    """
+    verb_tokens = [t for t in doc if t.lemma_ == verb]
+    subjects = [child.lemma_ for t in verb_tokens for child in t.children if child.dep == spacy.symbols.nsubj]
+    return Counter(subjects).most_common(10)
 
 
 def top10_objects(doc: spacy.tokens.Doc) -> list[tuple[str, int]]:
@@ -194,49 +208,52 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    # logging.info("Started script part 1.")
+    logging.info("Started script part 1.")
 
-    # # dependencies
-    # nltk.download("punkt_tab")  # English tokenizer
-    # nltk.download("cmudict")  # English syllable dictionary
+    # dependencies
+    nltk.download("punkt_tab")  # English tokenizer
+    nltk.download("cmudict")  # English syllable dictionary
 
-    # # question A
-    # logging.info("Running code for part 1 question A.")
-    # path = Path.cwd() / "p1-texts" / "novels"
-    # print(path)
-    # df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    # print(df.head())
+    # question A
+    logging.info("Running code for part 1 question A.")
+    path = Path.cwd() / "p1-texts" / "novels"
+    print(path)
+    df = read_novels(path) # this line will fail until you have completed the read_novels function above.
+    print(df.head())
 
-    # # question B
-    # logging.info("Running code for part 1 question B.")
-    # print(get_ttrs(df))
+    # question B
+    logging.info("Running code for part 1 question B.")
+    print(get_ttrs(df))
 
-    # # question C
-    # logging.info("Running code for part 1 question C.")
-    # print(get_fks(df))
+    # question C
+    logging.info("Running code for part 1 question C.")
+    print(get_fks(df))
 
-    # # question E
-    # logging.info("Running code for part 1 question E.")
-    # parse(df)
-    # print(df.head())
+    # question E
+    logging.info("Running code for part 1 question E.")
+    parse(df)
+    print(df.head())
 
     # question F
     logging.info("Running code for part 1 question F.")
     df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
+
+    logging.info("Extracting TOP10 objects for each document.")
     for _idx, row in df.iterrows():
         print(row["title"])
         print(top10_objects(row["parsed"]))
         print("\n")
-    """
+
+    logging.info("Extracting TOP10 subjects for verb 'to hear' by frequency for each document.")
     for _idx, row in df.iterrows():
         print(row["title"])
-        print(subjects_by_verb_count(row["parsed"], "hear"))
+        print(top10_subjects_by_verb_count(row["parsed"], "hear"))
         print("\n")
 
-    for _idx, row in df.iterrows():
-        print(row["title"])
-        print(subjects_by_verb_pmi(row["parsed"], "hear"))
-        print("\n")
-    """
+    # logging.info("Extracting TOP10 subjects for verb 'to hear' by point-wise mutual information for each document.")
+    # for _idx, row in df.iterrows():
+    #     print(row["title"])
+    #     print(subjects_by_verb_pmi(row["parsed"], "hear"))
+    #     print("\n")
 
     logging.info("Ended script part 1.")
