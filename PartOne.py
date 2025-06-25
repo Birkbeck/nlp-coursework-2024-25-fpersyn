@@ -3,6 +3,7 @@
 # Note: The template functions here and the dataframe format for structuring your solution is a suggested but not mandatory approach. You can use a different approach if you like, as long as you clearly answer the questions and communicate your answers clearly.
 
 from pathlib import Path
+import logging
 import string
 import re
 
@@ -10,6 +11,12 @@ import pandas as pd
 import spacy
 import nltk
 
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 2000000
@@ -95,11 +102,13 @@ def parse(
 
     # parse documents
     df["parsed"] = df["text"].apply(nlp)  # apply the spacy pipeline (nlp) to each text item
+    logging.debug("Added new column to DataFrame with parsed Doc objects for each file.")
 
     # pickle dataframe
     if not store_path.exists():
         store_path.mkdir()
     df.to_pickle(path=store_path / out_name)
+    logging.debug("Saved pickle file.")
 
     return df
 
@@ -164,32 +173,38 @@ def adjective_counts(doc):
     pass
 
 
-
 if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
+    logging.info("Start part 1 script.")
+
     # dependencies
     nltk.download("punkt_tab")  # English tokenizer
     nltk.download("cmudict")  # English syllable dictionary
 
     # question A
+    logging.info("Running code for part 1 question A.")
     path = Path.cwd() / "p1-texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
 
     # question B
+    logging.info("Running code for part 1 question B.")
     print(get_ttrs(df))
 
     # question C
+    logging.info("Running code for part 1 question C.")
     print(get_fks(df))
 
     # question E
+    logging.info("Running code for part 1 question E.")
     parse(df)
     print(df.head())
 
     # question F
+    logging.info("Running code for part 1 question F.")
     df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
 
     # print(adjective_counts(df))
@@ -204,3 +219,5 @@ if __name__ == "__main__":
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
         print("\n")
     """
+
+    logging.info("End part 1 script.")
