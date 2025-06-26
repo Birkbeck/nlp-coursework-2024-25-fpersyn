@@ -1,7 +1,9 @@
 from pathlib import Path
 import logging
 
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
+import numpy as np
 
 
 logging.basicConfig(
@@ -47,6 +49,23 @@ def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def get_features(docs: list[str]) -> tuple[np.array, np.ndarray]:
+    """
+    Extract features from the corpus.
+
+    Returns
+        headers: A numpy array of feature headers.
+        X: A numpy ndarray of extracted features.
+    """
+    vectoriser = TfidfVectorizer(stop_words="english", max_features=3000)
+    features: np.ndarray = vectoriser.fit_transform(docs)
+    headers: np.array = vectoriser.get_feature_names_out()
+
+    logging.debug(f"features extracted (shape): {features.shape}")
+    logging.debug(f"features extracted (excerpt): {headers[100:110]}")
+    return headers, features
+
+
 if __name__ == "__main__":
     logging.info("Started script part 2.")
 
@@ -54,5 +73,10 @@ if __name__ == "__main__":
     logging.info("Running code for part 2 question A.")
     df = get_dataset()
     df = filter_dataset(df)
+
+    # question B - get features
+    logging.info("Running code for part 2 question B.")
+    headers, X = get_features(df["speech"].to_list())
+    y = df["party"].to_list()  # target
 
     logging.info("Ended script part 2.")
