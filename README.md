@@ -14,3 +14,10 @@ on assessment offences and confirm that the work is my own, with the work
 of others clearly acknowledged. I give my permission to submit my report
 to the plagiarism testing database that the College is using and test it using
 plagiarism detection software, search engines or meta-searching software.”
+
+## Part1 Question D
+
+The Flesch-Kincaid Reading grade score is not a valid, robust or reliable estimator when:
+
+* When dealing with a niche corpus or very technical vocabulary which can result in an inflated number of syllables per word.
+* When documents or sentences are very short (e.g. tweets, short reviews, mobile text messages, ...) which will suppress the average sentence length.
