@@ -2,6 +2,7 @@ from pathlib import Path
 import logging
 
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 
@@ -74,9 +75,10 @@ if __name__ == "__main__":
     df = get_dataset()
     df = filter_dataset(df)
 
-    # question B - get features
+    # question B - get features and train/test datasets
     logging.info("Running code for part 2 question B.")
     headers, X = get_features(df["speech"].to_list())
-    y = df["party"].to_list()  # target
+    y = df["party"].to_numpy()  # target
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
 
     logging.info("Ended script part 2.")
