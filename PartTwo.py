@@ -106,4 +106,9 @@ if __name__ == "__main__":
     rf_clf.fit(X_train, y_train)
     inference_pipeline(rf_clf, X_test, y_test)
 
+    logging.info("Running linear SVM model.")
+    svm_clf =SVC(kernel='linear')
+    svm_clf.fit(X_train, y_train)
+    inference_pipeline(svm_clf, X_test, y_test)
+
     logging.info("Ended script part 2.")
