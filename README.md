@@ -20,7 +20,7 @@ plagiarism detection software, search engines or meta-searching software.”
 The Flesch-Kincaid Reading grade score is not a valid, robust or reliable estimator when:
 
 * When dealing with a niche corpus or very technical vocabulary which can result in an inflated number of syllables per word.
-* When documents or sentences are very short (e.g. tweets, short reviews, mobile text messages, ...) which will suppress the average sentence length.
+* When documents or sentences are very short (e.g. tweets, short reviews, telegrams, advertising copy, ...) which will suppress the average sentence length.
 
 ## Part2 Question E
 
