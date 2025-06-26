@@ -2,7 +2,10 @@ from pathlib import Path
 import logging
 
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report, f1_score
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 import pandas as pd
 import numpy as np
 
@@ -67,6 +70,20 @@ def get_features(docs: list[str]) -> tuple[np.array, np.ndarray]:
     return headers, features
 
 
+def inference_pipeline(model, X_test, y_test) -> np.array:
+    """Generalised inference pipeline."""
+
+    preds = model.predict(X_test)
+
+    macro_f1 = f1_score(y_test, preds, average="macro")
+    print("Macro-average F1 score", macro_f1)
+
+    print("Classification report:")
+    print(classification_report(y_test, preds))
+
+    return preds
+
+
 if __name__ == "__main__":
     logging.info("Started script part 2.")
 
@@ -80,5 +97,13 @@ if __name__ == "__main__":
     headers, X = get_features(df["speech"].to_list())
     y = df["party"].to_numpy()  # target
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
+
+    # question C - train/test models
+    logging.info("Running code for part 2 question C.")
+
+    logging.info("Running random forest model.")
+    rf_clf = RandomForestClassifier(n_estimators=300)
+    rf_clf.fit(X_train, y_train)
+    inference_pipeline(rf_clf, X_test, y_test)
 
     logging.info("Ended script part 2.")
