@@ -33,8 +33,11 @@ To avoid word variations (e.g. capitalisation, tenses, singular vs plural), I've
 Unfortunately, the current implementation does not improve classification performance at all compared to simple question D features (uni-/bi-/trigrams). The parsing also adds a considerable processing overhead (15+ min) slowing down iteration.
 
 Further iteration - using feature selection:
-Although not technically part of a tokenizer, I've implemented basic feature selection – selecting the top500 vectors based on a chi2 test with the target variable. My motivation for choosing feature selection is that many words should carry significant signal for their respective party. For example, I'd expect words such as "Scotland" or "independence" to carry high weights for the SNP. This improves the performance of the random forest classifier but doesn't add any incremental performance for the linear SVM.
+Although not technically part of a tokenizer, I've implemented basic feature selection – selecting the top500 vectors based on a chi2 test with the target variable. My motivation for choosing feature selection is that many words should carry significant signal for their respective party. For example, I'd expect words such as "Scotland" or "independence" to carry high weights for the SNP. This improves the performance of the random forest classifier considerably (especially accuracy and F1) but doesn't add any incremental performance for the linear SVM.
+
+Further iteration - using minimum document frequency:
+I've increased the minimum document word count to 2 (default: 1). Political speeches typically focus on repeated use of a set of keywords. This may make it more easy to ignore content that isn't the main content of a political speech. Bizarelly, this improves F1 classification performance for all classes but the Liberal Democrats – for both models.
 
 What I'd like to explore next:
-* Increasing the min document frequency required (default: 1). Political speeches typically focus on repeated use of a set of keywords. This may make it more easy to ignore content that isn't the main focus of a speech. (although technically part of a tokenizer)
-* Selecting words based on a polarity score.
+* Explore alternative feature selection metrics (e.g. point-wise PMI, word polarity score, ...)
+* Further experimentation with minimum document frequency

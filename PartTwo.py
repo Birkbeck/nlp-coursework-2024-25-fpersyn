@@ -163,7 +163,8 @@ if __name__ == "__main__":
         ngram_range=(1, 3),
         stop_words=None,  # handled in custom_tokenizer
         tokenizer=custom_tokenizer,
-        token_pattern=None  # to supress warning
+        token_pattern=None,  # to supress warning
+        min_df=2  # focus on repeat word-use
     )
     X = get_features(df["speech"].to_list(), vectoriser=custom_vectoriser)
     X = SelectKBest(chi2, k=500).fit_transform(X, y)
