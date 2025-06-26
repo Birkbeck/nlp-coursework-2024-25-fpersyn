@@ -53,21 +53,26 @@ def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def get_features(docs: list[str]) -> tuple[np.array, np.ndarray]:
+def get_features(docs: list[str], vectoriser = None) -> tuple[np.array, np.ndarray]:
     """
     Extract features from the corpus.
+
+    Args:
+        docs: A list of string documents.
+        vectoriser: A scikit-learn vectoriser (optional).
 
     Returns
         headers: A numpy array of feature headers.
         X: A numpy ndarray of extracted features.
     """
-    vectoriser = TfidfVectorizer(stop_words="english", max_features=3000)
+    if not vectoriser:
+        vectoriser = TfidfVectorizer(stop_words="english", max_features=3000)
     features: np.ndarray = vectoriser.fit_transform(docs)
     headers: np.array = vectoriser.get_feature_names_out()
 
     logging.debug(f"features extracted (shape): {features.shape}")
     logging.debug(f"features extracted (excerpt): {headers[100:110]}")
-    return headers, features
+    return features
 
 
 def inference_pipeline(model, X_test, y_test) -> np.array:
@@ -94,20 +99,38 @@ if __name__ == "__main__":
 
     # question B - get features and train/test datasets
     logging.info("Running code for part 2 question B.")
-    headers, X = get_features(df["speech"].to_list())
+    X = get_features(df["speech"].to_list())
     y = df["party"].to_numpy()  # target
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
 
     # question C - train/test models
     logging.info("Running code for part 2 question C.")
 
-    logging.info("Running random forest model.")
+    logging.info("Running random forest model (original feature set).")
     rf_clf = RandomForestClassifier(n_estimators=300)
     rf_clf.fit(X_train, y_train)
     inference_pipeline(rf_clf, X_test, y_test)
 
-    logging.info("Running linear SVM model.")
+    logging.info("Running linear SVM model (original feature set).")
     svm_clf =SVC(kernel='linear')
+    svm_clf.fit(X_train, y_train)
+    inference_pipeline(svm_clf, X_test, y_test)
+
+    # question D - alt feature set using vectoriser with uni-/bi-/tri-grams enabled
+    logging.info("Running code for part 2 question D.")
+    alt_vectoriser = TfidfVectorizer(
+        stop_words="english",
+        max_features=3000,
+        ngram_range=(1, 3)  # enables unigrams up to trigrams
+    )
+    X = get_features(df["speech"].to_list(), vectoriser=alt_vectoriser)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
+
+    logging.info("Running random forest model (alt feature set with bi-/trigrams).")
+    rf_clf.fit(X_train, y_train)
+    inference_pipeline(rf_clf, X_test, y_test)
+
+    logging.info("Running linear SVM model (alt feature set with bi-/trigrams).")
     svm_clf.fit(X_train, y_train)
     inference_pipeline(svm_clf, X_test, y_test)
 
