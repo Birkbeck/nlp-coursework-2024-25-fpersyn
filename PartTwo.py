@@ -8,6 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 import pandas as pd
 import numpy as np
+import spacy
 
 
 logging.basicConfig(
@@ -15,6 +16,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
+nlp = spacy.load("en_core_web_sm")
 
 
 def get_dataset() -> pd.DataFrame:
@@ -89,6 +91,25 @@ def inference_pipeline(model, X_test, y_test) -> np.array:
     return preds
 
 
+def custom_tokenizer(text: str) -> list[str]:
+    """Custom tokenizer to tokenize political speeches."""
+
+    # parse text
+    tokens: spacy.tokens.Doc = nlp(text)
+    logging.debug("Parsed document.")
+
+    # ignore spaces and punctuation
+    tokens = [t for t in tokens if not t.is_space and not t.is_punct]
+    # ignore stop words
+    tokens = [t for t in tokens if not t.is_stop]
+    # only include open-class words (content-bearing)
+    tokens = [t for t in tokens if t.pos_ in ["NOUN", "PROPN", "VERB", "ADJ", "ADV", "INTJ"]]
+    # only use the base-form of each word (adjusts for capitalisation, tenses, singular/plural)
+    tokens = [t.lemma_ for t in tokens]
+
+    return tokens
+
+
 if __name__ == "__main__":
     logging.info("Started script part 2.")
 
@@ -99,8 +120,8 @@ if __name__ == "__main__":
 
     # question B - get features and train/test datasets
     logging.info("Running code for part 2 question B.")
-    X = get_features(df["speech"].to_list())
     y = df["party"].to_numpy()  # target
+    X = get_features(df["speech"].to_list())
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
 
     # question C - train/test models
@@ -131,6 +152,26 @@ if __name__ == "__main__":
     inference_pipeline(rf_clf, X_test, y_test)
 
     logging.info("Running linear SVM model (alt feature set with bi-/trigrams).")
+    svm_clf.fit(X_train, y_train)
+    inference_pipeline(svm_clf, X_test, y_test)
+
+    # question E - alt feature set using custom tokeniser
+    logging.info("Running code for part 2 question E.")
+    custom_vectoriser = TfidfVectorizer(
+        max_features=3000,
+        ngram_range=(1, 3),
+        stop_words=None,  # handled in custom_tokenizer
+        tokenizer=custom_tokenizer,
+        token_pattern=None  # to supress warning
+    )
+    X = get_features(df["speech"].to_list(), vectoriser=custom_vectoriser)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
+
+    logging.info("Running random forest model (alt feature set with custom tokeniser).")
+    rf_clf.fit(X_train, y_train)
+    inference_pipeline(rf_clf, X_test, y_test)
+
+    logging.info("Running linear SVM model (alt feature set with custom tokeniser).")
     svm_clf.fit(X_train, y_train)
     inference_pipeline(svm_clf, X_test, y_test)
 
