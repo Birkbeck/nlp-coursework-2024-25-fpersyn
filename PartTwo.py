@@ -3,6 +3,7 @@ import logging
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report, f1_score
+from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -126,14 +127,14 @@ if __name__ == "__main__":
 
     # question C - train/test models
     logging.info("Running code for part 2 question C.")
+    rf_clf = RandomForestClassifier(n_estimators=300)
+    svm_clf =SVC(kernel='linear')
 
     logging.info("Running random forest model (original feature set).")
-    rf_clf = RandomForestClassifier(n_estimators=300)
     rf_clf.fit(X_train, y_train)
     inference_pipeline(rf_clf, X_test, y_test)
 
     logging.info("Running linear SVM model (original feature set).")
-    svm_clf =SVC(kernel='linear')
     svm_clf.fit(X_train, y_train)
     inference_pipeline(svm_clf, X_test, y_test)
 
@@ -165,6 +166,7 @@ if __name__ == "__main__":
         token_pattern=None  # to supress warning
     )
     X = get_features(df["speech"].to_list(), vectoriser=custom_vectoriser)
+    X = SelectKBest(chi2, k=500).fit_transform(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=26)
 
     logging.info("Running random forest model (alt feature set with custom tokeniser).")

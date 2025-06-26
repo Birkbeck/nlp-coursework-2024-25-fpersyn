@@ -32,7 +32,9 @@ To avoid word variations (e.g. capitalisation, tenses, singular vs plural), I've
 
 Unfortunately, the current implementation does not improve classification performance at all compared to simple question D features (uni-/bi-/trigrams). The parsing also adds a considerable processing overhead (15+ min) slowing down iteration.
 
+Further iteration - using feature selection:
+Although not technically part of a tokenizer, I've implemented basic feature selection – selecting the top500 vectors based on a chi2 test with the target variable. My motivation for choosing feature selection is that many words should carry significant signal for their respective party. For example, I'd expect words such as "Scotland" or "independence" to carry high weights for the SNP. This improves the performance of the random forest classifier but doesn't add any incremental performance for the linear SVM.
+
 What I'd like to explore next:
-* Implementing feature selection (of the TF-IDF vectors). For example, I'd expect a smaller set of features could be sufficient. For example, for the SNP I'd expect words such as "Scotland" or "independence" to carry high weights. (although technically part of a tokenizer)
 * Increasing the min document frequency required (default: 1). Political speeches typically focus on repeated use of a set of keywords. This may make it more easy to ignore content that isn't the main focus of a speech. (although technically part of a tokenizer)
 * Selecting words based on a polarity score.
